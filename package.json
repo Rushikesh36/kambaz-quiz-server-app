@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "kambaz-node-server-app",
+  "name": "kambaz-quiz-server-app",
   "version": "1.0.0",
   "description": "Node.js HTTP Web server for the Kambaz application",
   "main": "index.js",
