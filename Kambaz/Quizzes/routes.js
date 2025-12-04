@@ -29,6 +29,15 @@ export default function QuizzesRoutes(app) {
                 res.status(404).json({ error: "Quiz not found" });
                 return;
             }
+            
+            // Recalculate and update quiz points from questions
+            const questions = await questionsDao.findQuestionsForQuiz(quizId);
+            const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
+            if (quiz.points !== totalPoints) {
+                await quizzesDao.updateQuiz(quizId, { points: totalPoints });
+                quiz.points = totalPoints;
+            }
+            
             res.json(quiz);
         } catch (error) {
             res.status(500).json({ error: error.message });
