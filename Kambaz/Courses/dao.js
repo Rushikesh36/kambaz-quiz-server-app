@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import model from "./model.js";
 export default function CoursesDao() {
     function findAllCourses() {
-        return model.find({}, { name: 1, description: 1 });
+        return model.find({});
     }
     function createCourse(course) {
         const newCourse = { ...course, _id: uuidv4() };
