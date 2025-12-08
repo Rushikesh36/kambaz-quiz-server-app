@@ -1,10 +1,19 @@
 import mongoose from "mongoose";
 
-// Sub-schema for answer choices (for multiple choice and fill in blank)
+// Sub-schema for answer choices (for multiple choice)
 const answerChoiceSchema = new mongoose.Schema(
     {
         text: { type: String, required: true },
         isCorrect: { type: Boolean, default: false }
+    },
+    { _id: false }
+);
+
+// Sub-schema for fill-in-blank blanks
+const blankSchema = new mongoose.Schema(
+    {
+        label: { type: String, required: true }, // e.g., "Blank 1", "Blank 2"
+        correctAnswers: [{ type: String }] // Array of acceptable answers (case-insensitive)
     },
     { _id: false }
 );
@@ -24,8 +33,11 @@ const questionSchema = new mongoose.Schema(
         points: { type: Number, default: 1 },
         question: { type: String, required: true }, // Question text (supports HTML)
         
-        // For Multiple Choice and Fill in Blank
+        // For Multiple Choice
         choices: [answerChoiceSchema],
+        
+        // For Fill in Blank (new multi-blank support)
+        blanks: [blankSchema],
         
         // For True/False
         correctAnswer: { type: Boolean }, // true or false

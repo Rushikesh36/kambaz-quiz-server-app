@@ -273,11 +273,14 @@ export default function QuizzesRoutes(app) {
                     // Compare boolean answer
                     isCorrect = answer.answer === question.correctAnswer;
                 } else if (question.type === "FILL_IN_BLANK") {
-                    // Check if answer matches any correct choice (case-insensitive)
-                    const answerLower = String(answer.answer).toLowerCase().trim();
-                    isCorrect = question.choices.some(
-                        c => c.isCorrect && c.text.toLowerCase().trim() === answerLower
-                    );
+                    // Check if all blanks are answered correctly
+                    const userAnswers = Array.isArray(answer.answer) ? answer.answer : [answer.answer];
+                    isCorrect = (question.blanks || []).every((blank, idx) => {
+                        const userAnswer = String(userAnswers[idx] || "").toLowerCase().trim();
+                        return blank.correctAnswers.some(
+                            correctAns => correctAns.toLowerCase().trim() === userAnswer
+                        );
+                    });
                 }
                 
                 if (isCorrect) {
