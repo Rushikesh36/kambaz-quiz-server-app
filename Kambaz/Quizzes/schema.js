@@ -20,6 +20,7 @@ const quizSchema = new mongoose.Schema(
             default: "QUIZZES"
         },
         shuffleAnswers: { type: Boolean, default: true },
+        shuffleQuestions: { type: Boolean, default: false },
         timeLimit: { type: Number, default: 20 }, // in minutes
         multipleAttempts: { type: Boolean, default: false },
         howManyAttempts: { type: Number, default: 1 },
