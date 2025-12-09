@@ -33,9 +33,11 @@ export default function QuizzesRoutes(app) {
             // Recalculate and update quiz points from questions
             const questions = await questionsDao.findQuestionsForQuiz(quizId);
             const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
-            if (quiz.points !== totalPoints) {
-                await quizzesDao.updateQuiz(quizId, { points: totalPoints });
+            const questionCount = questions.length;
+            if (quiz.points !== totalPoints || quiz.questionCount !== questionCount) {
+                await quizzesDao.updateQuiz(quizId, { points: totalPoints, questionCount });
                 quiz.points = totalPoints;
+                quiz.questionCount = questionCount;
             }
             
             res.json(quiz);
@@ -120,7 +122,7 @@ export default function QuizzesRoutes(app) {
             // Update quiz points total
             const questions = await questionsDao.findQuestionsForQuiz(quizId);
             const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
-            await quizzesDao.updateQuiz(quizId, { points: totalPoints });
+            await quizzesDao.updateQuiz(quizId, { points: totalPoints, questionCount: questions.length });
             
             res.json(created);
         } catch (error) {
@@ -141,7 +143,7 @@ export default function QuizzesRoutes(app) {
             // Update quiz points total
             const questions = await questionsDao.findQuestionsForQuiz(updated.quiz);
             const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
-            await quizzesDao.updateQuiz(updated.quiz, { points: totalPoints });
+            await quizzesDao.updateQuiz(updated.quiz, { points: totalPoints, questionCount: questions.length });
             
             res.json(updated);
         } catch (error) {
@@ -162,7 +164,7 @@ export default function QuizzesRoutes(app) {
             if (quizId) {
                 const questions = await questionsDao.findQuestionsForQuiz(quizId);
                 const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
-                await quizzesDao.updateQuiz(quizId, { points: totalPoints });
+                await quizzesDao.updateQuiz(quizId, { points: totalPoints, questionCount: questions.length });
             }
             
             res.json(status);

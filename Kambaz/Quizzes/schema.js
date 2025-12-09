@@ -14,6 +14,7 @@ const quizSchema = new mongoose.Schema(
             default: "GRADED_QUIZ"
         },
         points: { type: Number, default: 0 }, // Sum of all question points
+        questionCount: { type: Number, default: 0 }, // Number of questions
         assignmentGroup: {
             type: String,
             enum: ["QUIZZES", "EXAMS", "ASSIGNMENTS", "PROJECT"],
