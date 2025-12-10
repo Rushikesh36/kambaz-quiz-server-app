@@ -197,43 +197,50 @@ export default function QuizzesRoutes(app) {
         }
     });
 
-    // POST /api/quizzes/:quizId/attempts - Start a new quiz attempt
-    app.post("/api/quizzes/:quizId/attempts", async (req, res) => {
-        try {
-            const { quizId } = req.params;
-            const { userId } = req.body;
-            
-            // Check how many attempts the user has made
-            const attemptCount = await attemptsDao.getAttemptCount(quizId, userId);
-            const quiz = await quizzesDao.findQuizById(quizId);
-            
-            // Check if user has exceeded attempts
-            if (!quiz.multipleAttempts && attemptCount >= 1) {
-                res.status(400).json({ error: "Maximum attempts reached" });
-                return;
-            }
-            
-            if (quiz.multipleAttempts && attemptCount >= quiz.howManyAttempts) {
-                res.status(400).json({ error: "Maximum attempts reached" });
-                return;
-            }
-            
-            // Create new attempt
-            const attempt = {
-                quiz: quizId,
-                user: userId,
-                attemptNumber: attemptCount + 1,
-                totalPoints: quiz.points,
-                answers: [],
-                isComplete: false
-            };
-            
-            const created = await attemptsDao.createAttempt(attempt);
-            res.json(created);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
+   // POST /api/quizzes/:quizId/attempts - Start a new quiz attempt
+app.post("/api/quizzes/:quizId/attempts", async (req, res) => {
+    try {
+        const { quizId } = req.params;
+        const { userId } = req.body;
+        
+        // IMPORTANT: Only count COMPLETED attempts
+        const completedAttempts = await attemptsDao.findAttemptsForUser(quizId, userId);
+        const attemptCount = completedAttempts.filter(a => a.isComplete).length;  // ← ADD THIS FILTER
+        
+        const quiz = await quizzesDao.findQuizById(quizId);
+        
+        if (!quiz) {
+            res.status(404).json({ error: "Quiz not found" });
+            return;
         }
-    });
+        
+        // Check if user has exceeded COMPLETED attempts
+        if (!quiz.multipleAttempts && attemptCount >= 1) {
+            res.status(400).json({ error: "Maximum attempts reached" });
+            return;
+        }
+        
+        if (quiz.multipleAttempts && attemptCount >= quiz.howManyAttempts) {
+            res.status(400).json({ error: "Maximum attempts reached" });
+            return;
+        }
+        
+        // Create new attempt
+        const attempt = {
+            quiz: quizId,
+            user: userId,
+            attemptNumber: attemptCount + 1,  // Based on completed attempts
+            totalPoints: quiz.points,
+            answers: [],
+            isComplete: false
+        };
+        
+        const created = await attemptsDao.createAttempt(attempt);
+        res.json(created);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
     // PUT /api/attempts/:attemptId/answers - Save answer progress (not submitted)
     app.put("/api/attempts/:attemptId/answers", async (req, res) => {
